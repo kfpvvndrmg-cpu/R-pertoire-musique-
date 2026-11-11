@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Mon Répertoire Musique</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --bg: #f5f6fa;
+            --text: #333;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: none;
+            margin-top: 10px;
+            background-color: white;
+            color: var(--primary);
+            font-weight: bold;
+        }
+        .search-container {
+            padding: 10px 15px;
+            background: white;
+            border-bottom: 1px solid #ddd;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+        #song-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            flex: 1;
+            padding-bottom: 80px; 
+        }
+        li {
+            background: white;
+            margin: 8px 15px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+        }
+        .song-text {
+            flex: 1;
+            margin-right: 10px;
+            word-break: break-word;
+            display: flex;
+            align-items: center;
+        }
+        .song-number {
+            font-weight: bold;
+            color: var(--secondary);
+            margin-right: 10px;
+            min-width: 35px;
+            display: inline-block;
+        }
+        .list-badge {
+            font-size: 11px;
+            color: #888;
+            margin-left: 8px;
+            font-weight: bold;
+            background: #eee;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+        button {
+            border: none;
+            background: none;
+            font-size: 18px;
+            padding: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 35px;
+            height: 35px;
+        }
+        .btn-insert { color: #27ae60; }
+        .btn-edit { color: var(--secondary); }
+        .btn-delete { color: #e74c3c; }
+        button:active { background: #eee; }
+        .add-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--secondary);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 30px;
+            font-size: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div id="app-title">Répertoire Musical</div>
+        <select id="list-selector">
+            <option value="ALL">🔍 Rechercher dans TOUT le répertoire</option>
+            <option value="A">Liste A (Photo 1)</option>
+            <option value="B">Liste B (Photo 2)</option>
+            <option value="C">Liste C (Photo 3)</option>
+            <option value="D">Liste D (Photo 4)</option>
+        </select>
+    </header>
+
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="Rechercher un titre ou un numéro...">
+    </div>
+
+    <ul id="song-list">
+        <!-- Les chansons s'afficheront ici -->
+    </ul>
+
+    <button class="add-btn" id="add-btn">+</button>
+
+    <script>
+        // --- DONNÉES INITIALES TIRÉES DE VOS PHOTOS ---
+        const defaultData = {
+            "A": [
+                "Le vieux piano", "Le danseur de Charleston", "La caissière du grand café", "Riquita", "Siffler sur la colline", "Le chou chou de mon cœur", "Le chouchou de mon cœur", "Le temps chez moi", "Fleur de Paris", "Gondolier", "En viva Espagna", "Tout va très bien", "Vénus", "Petit bikini", "Le p'tit pont", "Vive les Tamalous", "Le temps des fleurs", "La Chapelloise", "Il n'y a plus d'après", "La Chougada", "Bagarre à tout nu tout bronzé", "Nagurka", "Fiesta a Lisboa", "Avec les copains", "Les triolet", "Le roi d'arène", "Espagnolette", "El capitan", "La Fille de Dolores", "Beer Barrel", "Marche accordéonistes lyonnais", "Le jument de michao", "La gigue", "Les gars luron", "Dans le bac de grand lieu", "La chenille", "When the saints go marching in", "Tico Tico", "On va faire la java", "Marche des accordéoniste verdun", "The yellow rose of texas", "Suzannah", "Je m'voyais déjà", "Viens poupoule", "Les fêtes lointaines de pigalle", "Les retrouvailles - Le tiro du sergent", "Marin - compagnon chausson",
+                "Polka de l'espoir", "La polka a gervoux", "La polka des amoureux", "La polka d'jeannot", "Viens poupoule", "Chicken reel", "La polka du bras piad", "Cannelta polka", "Petite tonkinoise", "Luxembourg Polka"
+            ],
+            "B": [
+                "Adios Sevilla", "Ole Torero", "San Sebastiano", "Adios Muchachos", "Bucaro", "España cañi", "Guillardo", "España del sol", "Copias", "El bourino", "Esquimillo", "La Plaza de Toros", "La Bamboula",
+                "Le tourbillon", "Les paquerettes", "Les millionnaires du dimanche", "Domino", "Un homme debout", "Indifférence", "Soleil de Paris / L'hirondelle du Faubourg", "La valse d'Amélie", "L'accordéoniste", "La Foule", "Quand on s'promène au bord de l'eau", "Le p'tit bal du samedi soir", "Vesoul", "Retour des hirondelles", "Le gamin de Paris", "Sur un air d'accordéon", "Dimanche", "La valse dans la musette", "Les Flots du Danube", "La java", "Medley Guy Béart", "La Valse des patineurs", "Beau Soir de Vienne"
+            ],
+            "C": [
+                "Tu m'as donné ta jeunesse", "Adios Muchachos", "Le tango nous unit", "Rampeno", "La Paloma", "Naranjo en flor", "O de julio", "La comparsita", "Vous permettez monsieur", "La Marinite", "Nouveau canibale", "Chou cha cha", "Tico Tico", "Si tu vas à Rio", "El domingo de la Pasion", "La bamba", "A media luz", "Rock around the clock", "Strangers in the night", "Un Clair de lune à Maubeuge", "Qu'il fait bon vivre", "Chanson pour l'Auvergnat", "Le temps des fleurs", "La complainte de la butte", "Les copains d'abord", "La Gota Lolita", "Le déserteur", "Chorando Se Foi", "Adieu Lisbonne", "Cendrier rose et pommier blanc", "Petite Fleur", "Irish Jig", "Amsterdam", "Rossignol de mes Amours", "L'oiseau et l'enfant", "Le marchand de bonheur", "Nistral gagnant", "For me formidable", "Les bars du connémara", "Le Sirtaki", "Tarantella tortorella", "Paris canaille", "Tequila ranger", "The pink panther", "James Bond", "Le cheval du texas", "La jig irlandaise"
+            ],
+            "D": [
+                "Au plaisir des bois", "Valse de Vienne", "Un p'tit brin d'musette", "Printemps d'Alsace", "Carillon d'Alsace", "Mon amant de St Jean (12)", "Reine de musette", "Valse brune", "Printemps d'Alsace", "Un p'tit brin d'Musette - Pris - Les Contes d'Hoffman", "La dernière valse", "Mexico Mexican - Mexicaine", "Bayères Généziennes", "Princesse Czardas", "Shoe the donkey", "La complainte des infidèles", "Les valses de vienne", "Style musette", "Montagne d'Italie", "Rivalité", "Paris tu m'as pris dans tes bras", "Mon cœur d'attache", "Valse irlandaise", "La Foule", "Le p'tit bal du samedi soir", "Rigalle", "Tant qu'il y aura des Etoiles", "C'est un mauvais garçon", "La java bleu", "L'étoile des troubadours", "Dédé à montmartre", "Accordéon musette", "La cascade", "Toutes les femmes sont belle", "Là où y'a des filles", "Emmenez moi", "Amsterdam", "Vesoul - Paris en colère", "Recuerdo di Andorra", "A paris", "A paris", "Loin de paname", "La gage", "Valse chinoise", "Lorraine valse", "Le bal de la Marine", "C'est une valse pour 2", "Padam padam", "La romance de Paris", "A joinsville le pont", "Sous les pont de Paris", "Les Français d'Auvergne", "Sous le ciel de Paris",
+                "Javaski", "Java", "La Fusée", "Une partie de pétanque", "Le p'tit bal du samedi soir", "La java des musette", "Une partie de pétanque", "Ça gaze", "La java du pote", "Java java"
+            ]
+        };
+
+        // --- LOGIQUE DE L'APPLICATION ---
+        let currentList = 'ALL'; 
+        let appData = {};
+
+        function initData() {
+            const savedData = localStorage.getItem('repertoireMusiqueV3'); // Changement de nom pour forcer la mise à jour si besoin
+            if (savedData) {
+                appData = JSON.parse(savedData);
+            } else {
+                appData = JSON.parse(JSON.stringify(defaultData));
+                saveData();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('repertoireMusiqueV3', JSON.stringify(appData));
+        }
+
+        function renderList() {
+            const listElement = document.getElementById('song-list');
+            const searchInput = document.getElementById('search-input').value.toLowerCase();
+            listElement.innerHTML = '';
+
+            let songsToDisplay = [];
+
+            if (currentList === 'ALL') {
+                for (const listKey in appData) {
+                    appData[listKey].forEach((song, index) => {
+                        songsToDisplay.push({ song: song, originalIndex: index, listName: listKey });
+                    });
+                }
+            } else {
+                (appData[currentList] || []).forEach((song, index) => {
+                    songsToDisplay.push({ song: song, originalIndex: index, listName: currentList });
+                });
+            }
+            
+            songsToDisplay.forEach(item => {
+                const numStr = (item.originalIndex + 1).toString();
+                const fullSearchStr = currentList === 'ALL' ? `${item.listName}${numStr} ${item.song}`.toLowerCase() : `${numStr} ${item.song}`.toLowerCase();
+                
+                if (fullSearchStr.includes(searchInput)) {
+                    const li = document.createElement('li');
+                    
+                    const textContainer = document.createElement('div');
+                    textContainer.className = 'song-text';
+                    
+                    const numSpan = document.createElement('span');
+                    numSpan.className = 'song-number';
+                    numSpan.textContent = currentList === 'ALL' ? `${item.listName}${item.originalIndex + 1}.` : `${item.originalIndex + 1}.`;
+                    
+                    const titleSpan = document.createElement('span');
+                    titleSpan.textContent = item.song;
+                    
+                    textContainer.appendChild(numSpan);
+                    textContainer.appendChild(titleSpan);
+
+                    if (currentList === 'ALL') {
+                        const badge = document.createElement('span');
+                        badge.className = 'list-badge';
+                        badge.textContent = "Liste " + item.listName;
+                        textContainer.appendChild(badge);
+                    }
+                    
+                    const btnContainer = document.createElement('div');
+                    btnContainer.className = 'actions';
+                    
+                    // On affiche les boutons seulement si on n'est pas dans "TOUT"
+                    if (currentList !== 'ALL') {
+                        // Bouton Insérer
+                        const insertBtn = document.createElement('button');
+                        insertBtn.className = 'btn-insert';
+                        insertBtn.innerHTML = '➕';
+                        insertBtn.title = "Insérer ici";
+                        insertBtn.onclick = () => insertSong(item.originalIndex);
+                        
+                        // Bouton Modifier
+                        const editBtn = document.createElement('button');
+                        editBtn.className = 'btn-edit';
+                        editBtn.innerHTML = '✏️';
+                        editBtn.title = "Modifier";
+                        editBtn.onclick = () => editSong(item.originalIndex);
+                        
+                        // Bouton Supprimer
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'btn-delete';
+                        deleteBtn.innerHTML = '🗑️';
+                        deleteBtn.title = "Supprimer";
+                        deleteBtn.onclick = () => deleteSong(item.originalIndex);
+
+                        btnContainer.appendChild(insertBtn);
+                        btnContainer.appendChild(editBtn);
+                        btnContainer.appendChild(deleteBtn);
+                    }
+                    
+                    li.appendChild(textContainer);
+                    li.appendChild(btnContainer);
+                    listElement.appendChild(li);
+                }
+            });
+        }
+
+        // Ajouter à la fin (bouton +)
+        function addSong() {
+            if (currentList === 'ALL') {
+                alert("Veuillez sélectionner une liste spécifique (A, B, C ou D) dans le menu pour ajouter un titre.");
+                return;
+            }
+            const newSong = prompt("Entrez le nouveau titre à ajouter à la fin :");
+            if (newSong && newSong.trim() !== "") {
+                appData[currentList].push(newSong.trim());
+                saveData();
+                renderList();
+            }
+        }
+
+        // Insérer un titre à un endroit précis
+        function insertSong(index) {
+            const newSong = prompt("Entrez le titre à insérer :");
+            if (newSong !== null && newSong.trim() !== "") {
+                // On insère le titre à la position 'index'
+                appData[currentList].splice(index, 0, newSong.trim());
+                saveData();
+                renderList();
+            }
+        }
+
+        // Modifier un titre ET son numéro
+        function editSong(index) {
+            const currentTitle = appData[currentList][index];
+            
+            // 1. Demander le nouveau titre
+            const newTitle = prompt("Modifier le titre :", currentTitle);
+            if (newTitle === null) return; // Annulé
+
+            // 2. Demander le nouveau numéro (position)
+            const currentNum = index + 1;
+            const newNumStr = prompt(`À quel numéro de ligne (de 1 à ${appData[currentList].length}) voulez-vous placer ce titre ?`, currentNum);
+            
+            if (newNumStr === null) return; // Annulé
+            
+            let newNum = parseInt(newNumStr, 10);
+            
+            // Vérification du numéro
+            if (isNaN(newNum) || newNum < 1 || newNum > appData[currentList].length) {
+                alert("Numéro invalide. La position n'a pas été changée.");
+                newNum = currentNum;
+            }
+
+            // Mise à jour du titre
+            appData[currentList][index] = newTitle.trim();
+
+            // Mise à jour de la position si le numéro a changé
+            if (newNum !== currentNum) {
+                // On retire l'élément de sa position actuelle
+                const [movedItem] = appData[currentList].splice(index, 1);
+                // On le réinsère à la nouvelle position
+                appData[currentList].splice(newNum - 1, 0, movedItem);
+            }
+
+            saveData();
+            renderList();
+        }
+
+        // Supprimer un titre
+        function deleteSong(index) {
+            if (confirm("Supprimer ce titre ?")) {
+                appData[currentList].splice(index, 1);
+                saveData();
+                renderList();
+            }
+        }
+
+        // --- ÉVÉNEMENTS ---
+        document.getElementById('list-selector').addEventListener('change', (e) => {
+            currentList = e.target.value;
+            document.getElementById('search-input').value = ''; 
+            renderList();
+        });
+
+        document.getElementById('search-input').addEventListener('input', renderList);
+        document.getElementById('add-btn').addEventListener('click', addSong);
+
+        // Démarrage de l'app
+        initData();
+        renderList();
+
+    </script>
+</body>
+</html>
