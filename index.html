@@ -93,7 +93,7 @@
             font-weight: bold;
             color: var(--secondary);
             margin-right: 10px;
-            min-width: 35px;
+            min-width: 45px;
             display: inline-block;
         }
         .list-badge {
@@ -168,22 +168,229 @@
     <button class="add-btn" id="add-btn">+</button>
 
     <script>
-        // --- DONNÉES INITIALES ---
+        // --- DONNÉES INITIALES RETRANSCRITES DEPUIS LES PHOTOS ---
         const defaultData = {
             "A": [
-                "Le vieux piano", "Le danseur de Charleston", "La caissière du grand café", "Riquita", "Siffler sur la colline", "Le chou chou de mon cœur", "Le chouchou de mon cœur", "Le temps chez moi", "Fleur de Paris", "Gondolier", "En viva Espagna", "Tout va très bien", "Vénus", "Petit bikini", "Le p'tit pont", "Vive les Tamalous", "Le temps des fleurs", "La Chapelloise", "Il n'y a plus d'après", "La Chougada", "Bagarre à tout nu tout bronzé", "Nagurka", "Fiesta a Lisboa", "Avec les copains", "Les triolet", "Le roi d'arène", "Espagnolette", "El capitan", "La Fille de Dolores", "Beer Barrel", "Marche accordéonistes lyonnais", "Le jument de michao", "La gigue", "Les gars luron", "Dans le bac de grand lieu", "La chenille", "When the saints go marching in", "Tico Tico", "On va faire la java", "Marche des accordéoniste verdun", "The yellow rose of texas", "Suzannah", "Je m'voyais déjà", "Viens poupoule", "Les fêtes lointaines de pigalle", "Les retrouvailles - Le tiro du sergent", "Marin - compagnon chausson",
-                "Polka de l'espoir", "La polka a gervoux", "La polka des amoureux", "La polka d'jeannot", "Viens poupoule", "Chicken reel", "La polka du bras piad", "Cannelta polka", "Petite tonkinoise", "Luxembourg Polka"
+                {num: "1", title: "le vieux piano la"},
+                {num: "2", title: "le danseur de charleston"},
+                {num: "2 bis", title: "la caissière du grand café"},
+                {num: "3", title: "Riquita"},
+                {num: "4", title: "Siffler sur la Colline"},
+                {num: "5", title: "le chou chou de mon coeur"},
+                {num: "6", title: "le dénicheur"},
+                {num: "7", title: "le temps chez nous"},
+                {num: "8", title: "Fleur de Paris"},
+                {num: "9", title: ""},
+                {num: "10", title: "Gondolier"},
+                {num: "11", title: "En viva Espagna"},
+                {num: "12", title: "Tout va très bien"},
+                {num: "13", title: "Venus"},
+                {num: "14", title: "Petit bikini"},
+                {num: "15", title: "le p'tit pont"},
+                {num: "16", title: "vive les Tamalous"},
+                {num: "17", title: "Le temps des Fleurs"},
+                {num: "18", title: "la Chapelloise"},
+                {num: "19", title: "Il n'y a plus d'après"},
+                {num: "20", title: "la Chouzada"},
+                {num: "21", title: "Mazurkas Tout nu Tout bronzé"},
+                {num: "22", title: "Mazurkas"},
+                {num: "23", title: "Fiesta a Lisboa"},
+                {num: "24", title: "Avec les pompiers"},
+                {num: "25", title: "les Triolets"},
+                {num: "26", title: "le roi d'arène"},
+                {num: "27", title: "Espagnolette"},
+                {num: "28", title: "El capitan"},
+                {num: "29", title: ""},
+                {num: "30", title: "la Fille de Dolorès"},
+                {num: "31", title: ""},
+                {num: "32", title: "Beer Barrel"},
+                {num: "33", title: "Marche accordéonistes lyonnais"},
+                {num: "34", title: "La jument de michao"},
+                {num: "35", title: "La gigue"},
+                {num: "36", title: "les gars lurons"},
+                {num: "37", title: "Dans le bc de grand lieu"},
+                {num: "38", title: "La chenille"},
+                {num: "39", title: "When the saints go marchin in"},
+                {num: "40", title: "Tico Tico"},
+                {num: "41", title: "On va faire la java"},
+                {num: "42", title: "Marche des accordéoniste verdun"},
+                {num: "43", title: "The yellow rose of texas"},
+                {num: "44", title: "Suzannah"},
+                {num: "45", title: "Je m'voyais déjà"},
+                {num: "46", title: ""},
+                {num: "47", title: "Viens poupoule"},
+                {num: "48", title: "les p'tites femmes de pigalle"},
+                {num: "49", title: "les retrouvailles - le fifre du sergent"},
+                {num: "50", title: "Marin - compagnon chausson"},
+                {num: "51", title: "polka de l'espoir"},
+                {num: "52", title: "la polka a gervoux"},
+                {num: "53", title: "la polka des amoureux"},
+                {num: "54", title: "la polka d'jeannot"},
+                {num: "55", title: "Viens poupoule"},
+                {num: "56", title: "chicken reel"},
+                {num: "57", title: "la polka du brise pied"},
+                {num: "58", title: "clarinette polka"},
+                {num: "59", title: "Petite tonkinoise"},
+                {num: "60", title: "Luxembourg polka"}
             ],
             "B": [
-                "Adios Sevilla", "Ole Torero", "San Sebastiano", "Adios Muchachos", "Bucaro", "España cañi", "Guillardo", "España del sol", "Copias", "El bourino", "Esquimillo", "La Plaza de Toros", "La Bamboula",
-                "Le tourbillon", "Les paquerettes", "Les millionnaires du dimanche", "Domino", "Un homme debout", "Indifférence", "Soleil de Paris / L'hirondelle du Faubourg", "La valse d'Amélie", "L'accordéoniste", "La Foule", "Quand on s'promène au bord de l'eau", "Le p'tit bal du samedi soir", "Vesoul", "Retour des hirondelles", "Le gamin de Paris", "Sur un air d'accordéon", "Dimanche", "La valse dans la musette", "Les Flots du Danube", "La java", "Medley Guy Béart", "La Valse des patineurs", "Beau Soir de Vienne"
+                {num: "1", title: "Adios Sevilla"},
+                {num: "2", title: "Ole Torero"},
+                {num: "3", title: "San Sebastiano"},
+                {num: "4", title: "Adios Muchacho"},
+                {num: "5", title: "Bucaro"},
+                {num: "6", title: "España cañi"},
+                {num: "7", title: ""},
+                {num: "8", title: "Gaillardo"},
+                {num: "9", title: ""},
+                {num: "10", title: "España del sol"},
+                {num: "11", title: "Coplas"},
+                {num: "12", title: "El bourino"},
+                {num: "13", title: "Escamillo"},
+                {num: "14", title: "la Plaza de Toros"},
+                {num: "15", title: ""},
+                {num: "16", title: "La Bamboula"},
+                {num: "20", title: "Le tourbillon"},
+                {num: "21", title: "Les paquerettes"},
+                {num: "22", title: "les millionnaires du dimanche"},
+                {num: "23", title: "Domino"},
+                {num: "24", title: "Un homme debout"},
+                {num: "25", title: "indifférence"},
+                {num: "26", title: "Sous le ciel de Paris / L'hirondelle du Faubourg"},
+                {num: "27", title: "la valse d'Amélie"},
+                {num: "28", title: "L'accordéoniste"},
+                {num: "29", title: "La Foule"},
+                {num: "30", title: "Quand on s'promène au bord de l'eau"},
+                {num: "31", title: "le p'tit bal du samedi soir"},
+                {num: "32", title: "Vesoul"},
+                {num: "33", title: "Retour des hirondelles"},
+                {num: "35", title: "le gamin de Paris"},
+                {num: "37", title: "Sur un air d'accordéon"},
+                {num: "39", title: "Dimanche"},
+                {num: "40", title: "Valse dans la musette"},
+                {num: "41", title: "les Flots du Danube"},
+                {num: "43", title: "la java"},
+                {num: "45", title: "Medley Guy Béart"},
+                {num: "46", title: "la Valse des patineurs"},
+                {num: "47", title: "Beau Soir de Vienne"}
             ],
             "C": [
-                "Tu m'as donné ta jeunesse", "Adios Muchachos", "Le tango nous unit", "Rampeno", "La Paloma", "Naranjo en flor", "O de julio", "La comparsita", "Vous permettez monsieur", "La Marinite", "Nouveau canibale", "Chou cha cha", "Tico Tico", "Si tu vas à Rio", "El domingo de la Pasion", "La bamba", "A media luz", "Rock around the clock", "Strangers in the night", "Un Clair de lune à Maubeuge", "Qu'il fait bon vivre", "Chanson pour l'Auvergnat", "Le temps des fleurs", "La complainte de la butte", "Les copains d'abord", "La Gota Lolita", "Le déserteur", "Chorando Se Foi", "Adieu Lisbonne", "Cendrier rose et pommier blanc", "Petite Fleur", "Irish Jig", "Amsterdam", "Rossignol de mes Amours", "L'oiseau et l'enfant", "Le marchand de bonheur", "Nistral gagnant", "For me formidable", "Les bars du connémara", "Le Sirtaki", "Tarantella tortorella", "Paris canaille", "Tequila ranger", "The pink panther", "James Bond", "Le cheval du texas", "La jig irlandaise"
+                {num: "1", title: "Tu m'as donné ta jeunesse"},
+                {num: "2", title: "Adios Muchachos"},
+                {num: "3", title: "Le tango nous invite"},
+                {num: "4", title: "Rampeno"},
+                {num: "5", title: "La Paloma"},
+                {num: "6", title: "Maradoma tango"},
+                {num: "7", title: "9 de julio"},
+                {num: "8", title: "La comparsita"},
+                {num: "9", title: "Vous permettez Monsieur"},
+                {num: "10", title: ""},
+                {num: "11", title: "La Marmite"},
+                {num: "12", title: "Monsieur canibale"},
+                {num: "13", title: ""},
+                {num: "14", title: "Chou cha cha cha"},
+                {num: "15", title: "tico Tico"},
+                {num: "16", title: "Si tu vas a rio"},
+                {num: "17", title: "El domingo de la Pasion"},
+                {num: "18", title: "la bamba"},
+                {num: "19", title: "a media Luz"},
+                {num: "20", title: "Rock around the clock"},
+                {num: "21", title: "Strangers in the night"},
+                {num: "22", title: "Un clair de lune a maubeuge"},
+                {num: "23", title: "Qu'il fait bon vivre"},
+                {num: "24", title: "Chanson pour l'Auvergnat"},
+                {num: "25", title: "le temps des Fleurs"},
+                {num: "26", title: "la complainte de la butte"},
+                {num: "27", title: "les copains d'Abord"},
+                {num: "28", title: "la Gota Lolita"},
+                {num: "29", title: "le déserteur"},
+                {num: "30", title: "Chorando Se Foi"},
+                {num: "31", title: "Adieu lisbonne"},
+                {num: "32", title: "Cerisier rose et pommier blanc"},
+                {num: "33", title: "Petite Fleur"},
+                {num: "34", title: "Irish Jig"},
+                {num: "35", title: "Amsterdam"},
+                {num: "36", title: "Rossignol de mes Amours"},
+                {num: "37", title: "L'oiseau et l'enfant"},
+                {num: "38", title: "le marchand de bonheur"},
+                {num: "39", title: "Mistral gagnant"},
+                {num: "40", title: "For me Formidable"},
+                {num: "41", title: "les lacs du connémara"},
+                {num: "42", title: "le Sirtaki"},
+                {num: "43", title: "Tarantella tortorella"},
+                {num: "44", title: "Paris canaille"},
+                {num: "45", title: "Texas rangers"},
+                {num: "46", title: "the pink panther"},
+                {num: "47", title: "Jesse James"},
+                {num: "48", title: "le chérif du texas"},
+                {num: "49", title: "la balade Irlandaise"}
             ],
             "D": [
-                "Au plaisir des bois", "Valse de Vienne", "Un p'tit brin d'musette", "Printemps d'Alsace", "Carillon d'Alsace", "Mon amant de St Jean (12)", "Reine de musette", "Valse brune", "Printemps d'Alsace", "Un p'tit brin d'Musette - Pris - Les Contes d'Hoffman", "La dernière valse", "Mexico Mexican - Mexicaine", "Bayères Généziennes", "Princesse Czardas", "Shoe the donkey", "La complainte des infidèles", "Les valses de vienne", "Style musette", "Montagne d'Italie", "Rivalité", "Paris tu m'as pris dans tes bras", "Mon cœur d'attache", "Valse irlandaise", "La Foule", "Le p'tit bal du samedi soir", "Rigalle", "Tant qu'il y aura des Etoiles", "C'est un mauvais garçon", "La java bleu", "L'étoile des troubadours", "Dédé à montmartre", "Accordéon musette", "La cascade", "Toutes les femmes sont belle", "Là où y'a des filles", "Emmenez moi", "Amsterdam", "Vesoul - Paris en colère", "Recuerdo di Andorra", "A paris", "A paris", "Loin de paname", "La gage", "Valse chinoise", "Lorraine valse", "Le bal de la Marine", "C'est une valse pour 2", "Padam padam", "La romance de Paris", "A joinsville le pont", "Sous les pont de Paris", "Les Français d'Auvergne", "Sous le ciel de Paris",
-                "Javaski", "Java", "La Fusée", "Une partie de pétanque", "Le p'tit bal du samedi soir", "La java des musette", "Une partie de pétanque", "Ça gaze", "La java du pote", "Java java"
+                {num: "1", title: "Au plaisir des bois"},
+                {num: "2", title: "Valse de Vienne"},
+                {num: "3", title: "un p'tit brin d'musette"},
+                {num: "4", title: "Printemps d'Alsace"},
+                {num: "5", title: "Carillon d'Alsace"},
+                {num: "6", title: ""},
+                {num: "7", title: "Mon amant de st Jean (12)"},
+                {num: "8", title: "Reine de musette"},
+                {num: "9", title: "Valse brune"},
+                {num: "10", title: "Printemps d'Alsace"},
+                {num: "11", title: "Un p'tit brin d'Musette - Bris - les Contes d'Hoffman"},
+                {num: "13", title: "la dernière valse"},
+                {num: "14", title: "Mexico Mexican - Mexicaine"},
+                {num: "15", title: "Bruyères Corréziennes"},
+                {num: "16", title: "Princesse Czardas"},
+                {num: "17", title: "Shoe the donkey"},
+                {num: "18", title: "la complainte des infidèles"},
+                {num: "19", title: "les valses de viennes"},
+                {num: "20", title: "Style musette"},
+                {num: "21", title: "Montagne d'Italie"},
+                {num: "22", title: "Rivalité"},
+                {num: "23", title: "Paris tu m'as pris dans tes bras"},
+                {num: "24", title: "Mon coeur d'attache"},
+                {num: "25", title: "Valse irlandaise"},
+                {num: "26", title: "La foule"},
+                {num: "27", title: "le p'tit bal du samedi soir"},
+                {num: "28", title: "Pigalle"},
+                {num: "29", title: "Tant qu'il y aura des Etoiles"},
+                {num: "30", title: "C'est un mauvais garçon"},
+                {num: "31", title: "la java bleu"},
+                {num: "32", title: "L'étoile des troubadours"},
+                {num: "33", title: "Dédé à montmartre"},
+                {num: "34", title: "Accordéon musette"},
+                {num: "36 37", title: "la cascade"},
+                {num: "38", title: "toutes les femmes sont belles"},
+                {num: "39", title: "Là où y'a des frites"},
+                {num: "40", title: "Emmenez moi"},
+                {num: "41", title: "Amsterdam"},
+                {num: "42", title: "Vesoul - Paris en colère"},
+                {num: "43", title: "Recuerdo di Andorra"},
+                {num: "44", title: "A paris"},
+                {num: "45", title: "A paris"},
+                {num: "46", title: "Loin de paname"},
+                {num: "47", title: "Ca gaze"},
+                {num: "48", title: "valse chinoise"},
+                {num: "49", title: "Lorraine valse"},
+                {num: "50", title: "le bal de la Marine"},
+                {num: "51", title: "C'est une valse pour 2"},
+                {num: "52", title: "Padam Padam"},
+                {num: "53", title: ""},
+                {num: "54", title: "la romance de Paris"},
+                {num: "55", title: "A Joinville le Pont"},
+                {num: "56", title: "Sous les pont de Paris"},
+                {num: "57", title: "Les Fiancés d'Auvergne"},
+                {num: "58", title: "Sous le ciel de Paris"},
+                {num: "70", title: "Javaski"},
+                {num: "71", title: "Java"},
+                {num: "72", title: "La Fusée"},
+                {num: "73", title: "Une partie de Pétanque"},
+                {num: "74", title: "le p'tit bal du samedi soir"},
+                {num: "75", title: "La java du musette"},
+                {num: "76", title: "une partie de pétanque"},
+                {num: "77", title: "Ca gaze"},
+                {num: "78", title: "la java du Pote"},
+                {num: "79", title: "Java java"}
             ]
         };
 
@@ -192,42 +399,19 @@
         let appData = {};
 
         function initData() {
-            // Version V4 pour le nouveau format (objets au lieu de chaines)
-            const savedData = localStorage.getItem('repertoireMusiqueV4'); 
+            // Version V5 pour forcer le rechargement depuis vos vraies photos
+            const savedData = localStorage.getItem('repertoireMusiqueV5'); 
             
             if (savedData) {
                 appData = JSON.parse(savedData);
             } else {
-                // Essayer de récupérer V3 pour ne pas perdre les données
-                const oldData = localStorage.getItem('repertoireMusiqueV3');
-                if (oldData) {
-                    const parsedOld = JSON.parse(oldData);
-                    appData = {};
-                    for (const key in parsedOld) {
-                        // On convertit l'ancien format (texte) vers le nouveau (objet {num, title})
-                        appData[key] = parsedOld[key].map((song, i) => {
-                            if (typeof song === 'string') {
-                                return { num: (i + 1).toString(), title: song };
-                            }
-                            return song; 
-                        });
-                    }
-                } else {
-                    // Charger defaultData
-                    appData = {};
-                    for (const key in defaultData) {
-                        appData[key] = defaultData[key].map((song, i) => ({
-                            num: (i + 1).toString(),
-                            title: song
-                        }));
-                    }
-                }
+                appData = JSON.parse(JSON.stringify(defaultData));
                 saveData();
             }
         }
 
         function saveData() {
-            localStorage.setItem('repertoireMusiqueV4', JSON.stringify(appData));
+            localStorage.setItem('repertoireMusiqueV5', JSON.stringify(appData));
         }
 
         function renderList() {
