@@ -80,6 +80,7 @@
             justify-content: space-between;
             align-items: center;
             font-size: 16px;
+            min-height: 24px;
         }
         .song-text {
             flex: 1;
@@ -167,7 +168,7 @@
     <button class="add-btn" id="add-btn">+</button>
 
     <script>
-        // --- DONNÉES INITIALES TIRÉES DE VOS PHOTOS ---
+        // --- DONNÉES INITIALES ---
         const defaultData = {
             "A": [
                 "Le vieux piano", "Le danseur de Charleston", "La caissière du grand café", "Riquita", "Siffler sur la colline", "Le chou chou de mon cœur", "Le chouchou de mon cœur", "Le temps chez moi", "Fleur de Paris", "Gondolier", "En viva Espagna", "Tout va très bien", "Vénus", "Petit bikini", "Le p'tit pont", "Vive les Tamalous", "Le temps des fleurs", "La Chapelloise", "Il n'y a plus d'après", "La Chougada", "Bagarre à tout nu tout bronzé", "Nagurka", "Fiesta a Lisboa", "Avec les copains", "Les triolet", "Le roi d'arène", "Espagnolette", "El capitan", "La Fille de Dolores", "Beer Barrel", "Marche accordéonistes lyonnais", "Le jument de michao", "La gigue", "Les gars luron", "Dans le bac de grand lieu", "La chenille", "When the saints go marching in", "Tico Tico", "On va faire la java", "Marche des accordéoniste verdun", "The yellow rose of texas", "Suzannah", "Je m'voyais déjà", "Viens poupoule", "Les fêtes lointaines de pigalle", "Les retrouvailles - Le tiro du sergent", "Marin - compagnon chausson",
@@ -191,17 +192,42 @@
         let appData = {};
 
         function initData() {
-            const savedData = localStorage.getItem('repertoireMusiqueV3'); // Changement de nom pour forcer la mise à jour si besoin
+            // Version V4 pour le nouveau format (objets au lieu de chaines)
+            const savedData = localStorage.getItem('repertoireMusiqueV4'); 
+            
             if (savedData) {
                 appData = JSON.parse(savedData);
             } else {
-                appData = JSON.parse(JSON.stringify(defaultData));
+                // Essayer de récupérer V3 pour ne pas perdre les données
+                const oldData = localStorage.getItem('repertoireMusiqueV3');
+                if (oldData) {
+                    const parsedOld = JSON.parse(oldData);
+                    appData = {};
+                    for (const key in parsedOld) {
+                        // On convertit l'ancien format (texte) vers le nouveau (objet {num, title})
+                        appData[key] = parsedOld[key].map((song, i) => {
+                            if (typeof song === 'string') {
+                                return { num: (i + 1).toString(), title: song };
+                            }
+                            return song; 
+                        });
+                    }
+                } else {
+                    // Charger defaultData
+                    appData = {};
+                    for (const key in defaultData) {
+                        appData[key] = defaultData[key].map((song, i) => ({
+                            num: (i + 1).toString(),
+                            title: song
+                        }));
+                    }
+                }
                 saveData();
             }
         }
 
         function saveData() {
-            localStorage.setItem('repertoireMusiqueV3', JSON.stringify(appData));
+            localStorage.setItem('repertoireMusiqueV4', JSON.stringify(appData));
         }
 
         function renderList() {
@@ -213,19 +239,23 @@
 
             if (currentList === 'ALL') {
                 for (const listKey in appData) {
-                    appData[listKey].forEach((song, index) => {
-                        songsToDisplay.push({ song: song, originalIndex: index, listName: listKey });
+                    appData[listKey].forEach((item, index) => {
+                        songsToDisplay.push({ data: item, originalIndex: index, listName: listKey });
                     });
                 }
             } else {
-                (appData[currentList] || []).forEach((song, index) => {
-                    songsToDisplay.push({ song: song, originalIndex: index, listName: currentList });
+                (appData[currentList] || []).forEach((item, index) => {
+                    songsToDisplay.push({ data: item, originalIndex: index, listName: currentList });
                 });
             }
             
             songsToDisplay.forEach(item => {
-                const numStr = (item.originalIndex + 1).toString();
-                const fullSearchStr = currentList === 'ALL' ? `${item.listName}${numStr} ${item.song}`.toLowerCase() : `${numStr} ${item.song}`.toLowerCase();
+                const numStr = item.data.num ? item.data.num.toString() : '';
+                const titleStr = item.data.title || '';
+                
+                const fullSearchStr = currentList === 'ALL' 
+                    ? `${item.listName}${numStr} ${titleStr}`.toLowerCase() 
+                    : `${numStr} ${titleStr}`.toLowerCase();
                 
                 if (fullSearchStr.includes(searchInput)) {
                     const li = document.createElement('li');
@@ -233,14 +263,21 @@
                     const textContainer = document.createElement('div');
                     textContainer.className = 'song-text';
                     
-                    const numSpan = document.createElement('span');
-                    numSpan.className = 'song-number';
-                    numSpan.textContent = currentList === 'ALL' ? `${item.listName}${item.originalIndex + 1}.` : `${item.originalIndex + 1}.`;
+                    if (numStr !== '') {
+                        const numSpan = document.createElement('span');
+                        numSpan.className = 'song-number';
+                        numSpan.textContent = currentList === 'ALL' ? `${item.listName}${numStr}.` : `${numStr}.`;
+                        textContainer.appendChild(numSpan);
+                    } else if (currentList === 'ALL') {
+                        // S'il n'y a pas de numéro mais qu'on est dans la vue TOUT, on affiche au moins la lettre
+                        const numSpan = document.createElement('span');
+                        numSpan.className = 'song-number';
+                        numSpan.textContent = `${item.listName}.`;
+                        textContainer.appendChild(numSpan);
+                    }
                     
                     const titleSpan = document.createElement('span');
-                    titleSpan.textContent = item.song;
-                    
-                    textContainer.appendChild(numSpan);
+                    titleSpan.textContent = titleStr;
                     textContainer.appendChild(titleSpan);
 
                     if (currentList === 'ALL') {
@@ -255,21 +292,18 @@
                     
                     // On affiche les boutons seulement si on n'est pas dans "TOUT"
                     if (currentList !== 'ALL') {
-                        // Bouton Insérer
                         const insertBtn = document.createElement('button');
                         insertBtn.className = 'btn-insert';
                         insertBtn.innerHTML = '➕';
                         insertBtn.title = "Insérer ici";
                         insertBtn.onclick = () => insertSong(item.originalIndex);
                         
-                        // Bouton Modifier
                         const editBtn = document.createElement('button');
                         editBtn.className = 'btn-edit';
                         editBtn.innerHTML = '✏️';
                         editBtn.title = "Modifier";
                         editBtn.onclick = () => editSong(item.originalIndex);
                         
-                        // Bouton Supprimer
                         const deleteBtn = document.createElement('button');
                         deleteBtn.className = 'btn-delete';
                         deleteBtn.innerHTML = '🗑️';
@@ -291,68 +325,68 @@
         // Ajouter à la fin (bouton +)
         function addSong() {
             if (currentList === 'ALL') {
-                alert("Veuillez sélectionner une liste spécifique (A, B, C ou D) dans le menu pour ajouter un titre.");
+                alert("Veuillez sélectionner une liste spécifique (A, B, C ou D) dans le menu pour ajouter.");
                 return;
             }
-            const newSong = prompt("Entrez le nouveau titre à ajouter à la fin :");
-            if (newSong && newSong.trim() !== "") {
-                appData[currentList].push(newSong.trim());
-                saveData();
-                renderList();
-            }
+            const newNum = prompt("Entrez le numéro (ex: 12, 12bis) ou laissez vide :");
+            if (newNum === null) return; 
+
+            const newTitle = prompt("Entrez le titre (ou laissez vide) :");
+            if (newTitle === null) return;
+
+            appData[currentList].push({ num: newNum.trim(), title: newTitle.trim() });
+            saveData();
+            renderList();
         }
 
         // Insérer un titre à un endroit précis
         function insertSong(index) {
-            const newSong = prompt("Entrez le titre à insérer :");
-            if (newSong !== null && newSong.trim() !== "") {
-                // On insère le titre à la position 'index'
-                appData[currentList].splice(index, 0, newSong.trim());
-                saveData();
-                renderList();
-            }
+            const newNum = prompt("Entrez le numéro à insérer (ex: 12bis) ou laissez vide :");
+            if (newNum === null) return;
+
+            const newTitle = prompt("Entrez le titre à insérer (ou laissez vide) :");
+            if (newTitle === null) return;
+
+            appData[currentList].splice(index, 0, { num: newNum.trim(), title: newTitle.trim() });
+            saveData();
+            renderList();
         }
 
-        // Modifier un titre ET son numéro
+        // Modifier un titre ET son numéro/position
         function editSong(index) {
-            const currentTitle = appData[currentList][index];
+            const currentItem = appData[currentList][index];
             
-            // 1. Demander le nouveau titre
-            const newTitle = prompt("Modifier le titre :", currentTitle);
-            if (newTitle === null) return; // Annulé
+            // 1. Demander le nouveau numéro (affichage)
+            const newNum = prompt("Modifier le numéro d'affichage (ex: 12, 12bis) :", currentItem.num || "");
+            if (newNum === null) return; 
 
-            // 2. Demander le nouveau numéro (position)
-            const currentNum = index + 1;
-            const newNumStr = prompt(`À quel numéro de ligne (de 1 à ${appData[currentList].length}) voulez-vous placer ce titre ?`, currentNum);
-            
-            if (newNumStr === null) return; // Annulé
-            
-            let newNum = parseInt(newNumStr, 10);
-            
-            // Vérification du numéro
-            if (isNaN(newNum) || newNum < 1 || newNum > appData[currentList].length) {
-                alert("Numéro invalide. La position n'a pas été changée.");
-                newNum = currentNum;
-            }
+            // 2. Demander le nouveau titre
+            const newTitle = prompt("Modifier le titre :", currentItem.title || "");
+            if (newTitle === null) return; 
 
-            // Mise à jour du titre
-            appData[currentList][index] = newTitle.trim();
+            // 3. Demander si on veut déplacer la ligne visuellement dans la liste
+            const currentPos = index + 1;
+            const newPosStr = prompt(`À quelle ligne de tableau (de 1 à ${appData[currentList].length}) voulez-vous placer ceci ?\n(Laissez tel quel pour ne pas bouger la ligne)`, currentPos);
+            if (newPosStr === null) return; 
+            
+            let newPos = parseInt(newPosStr, 10);
+            
+            // Mise à jour de l'objet
+            appData[currentList][index] = { num: newNum.trim(), title: newTitle.trim() };
 
-            // Mise à jour de la position si le numéro a changé
-            if (newNum !== currentNum) {
-                // On retire l'élément de sa position actuelle
+            // Déplacement dans le tableau si demandé
+            if (!isNaN(newPos) && newPos >= 1 && newPos <= appData[currentList].length && newPos !== currentPos) {
                 const [movedItem] = appData[currentList].splice(index, 1);
-                // On le réinsère à la nouvelle position
-                appData[currentList].splice(newNum - 1, 0, movedItem);
+                appData[currentList].splice(newPos - 1, 0, movedItem);
             }
 
             saveData();
             renderList();
         }
 
-        // Supprimer un titre
+        // Supprimer
         function deleteSong(index) {
-            if (confirm("Supprimer ce titre ?")) {
+            if (confirm("Supprimer cette ligne ?")) {
                 appData[currentList].splice(index, 1);
                 saveData();
                 renderList();
