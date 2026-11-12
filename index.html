@@ -7,7 +7,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Mon Répertoire Musique</title>
     
-    <!-- Icône pour l'écran d'accueil iPhone (iOS) et navigateur -->
     <link rel="apple-touch-icon" href="88304b8d11d99949d4da5e8a2aed6ad5.jpg">
     <link rel="icon" type="image/jpeg" href="88304b8d11d99949d4da5e8a2aed6ad5.jpg">
 
@@ -107,7 +106,7 @@
         }
         .actions {
             display: flex;
-            gap: 5px;
+            gap: 2px;
         }
         button {
             border: none;
@@ -119,13 +118,15 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 35px;
-            height: 35px;
+            width: 32px;
+            height: 32px;
         }
+        .btn-move { color: #7f8c8d; }
         .btn-insert { color: #27ae60; }
         .btn-edit { color: var(--secondary); }
         .btn-delete { color: #e74c3c; }
         button:active { background: #eee; }
+        
         .add-btn {
             position: fixed;
             bottom: 20px;
@@ -399,8 +400,8 @@
         let appData = {};
 
         function initData() {
-            // Version V5 pour forcer le rechargement depuis vos vraies photos
-            const savedData = localStorage.getItem('repertoireMusiqueV5'); 
+            // V6 pour forcer la mise à jour depuis le cache
+            const savedData = localStorage.getItem('repertoireMusiqueV6'); 
             
             if (savedData) {
                 appData = JSON.parse(savedData);
@@ -411,7 +412,7 @@
         }
 
         function saveData() {
-            localStorage.setItem('repertoireMusiqueV5', JSON.stringify(appData));
+            localStorage.setItem('repertoireMusiqueV6', JSON.stringify(appData));
         }
 
         function renderList() {
@@ -453,7 +454,6 @@
                         numSpan.textContent = currentList === 'ALL' ? `${item.listName}${numStr}.` : `${numStr}.`;
                         textContainer.appendChild(numSpan);
                     } else if (currentList === 'ALL') {
-                        // S'il n'y a pas de numéro mais qu'on est dans la vue TOUT, on affiche au moins la lettre
                         const numSpan = document.createElement('span');
                         numSpan.className = 'song-number';
                         numSpan.textContent = `${item.listName}.`;
@@ -474,26 +474,48 @@
                     const btnContainer = document.createElement('div');
                     btnContainer.className = 'actions';
                     
-                    // On affiche les boutons seulement si on n'est pas dans "TOUT"
                     if (currentList !== 'ALL') {
+                        // Flèche Haut
+                        const upBtn = document.createElement('button');
+                        upBtn.className = 'btn-move';
+                        upBtn.innerHTML = '⬆️';
+                        upBtn.title = "Monter";
+                        upBtn.onclick = () => moveSongUp(item.originalIndex);
+                        
+                        // Flèche Bas
+                        const downBtn = document.createElement('button');
+                        downBtn.className = 'btn-move';
+                        downBtn.innerHTML = '⬇️';
+                        downBtn.title = "Descendre";
+                        downBtn.onclick = () => moveSongDown(item.originalIndex);
+
+                        // Insérer
                         const insertBtn = document.createElement('button');
                         insertBtn.className = 'btn-insert';
                         insertBtn.innerHTML = '➕';
                         insertBtn.title = "Insérer ici";
                         insertBtn.onclick = () => insertSong(item.originalIndex);
                         
+                        // Modifier
                         const editBtn = document.createElement('button');
                         editBtn.className = 'btn-edit';
                         editBtn.innerHTML = '✏️';
                         editBtn.title = "Modifier";
                         editBtn.onclick = () => editSong(item.originalIndex);
                         
+                        // Supprimer
                         const deleteBtn = document.createElement('button');
                         deleteBtn.className = 'btn-delete';
                         deleteBtn.innerHTML = '🗑️';
                         deleteBtn.title = "Supprimer";
                         deleteBtn.onclick = () => deleteSong(item.originalIndex);
 
+                        // Si c'est le premier élément, on désactive la flèche haut, etc.
+                        if (item.originalIndex === 0) upBtn.style.opacity = '0.2';
+                        if (item.originalIndex === appData[currentList].length - 1) downBtn.style.opacity = '0.2';
+
+                        btnContainer.appendChild(upBtn);
+                        btnContainer.appendChild(downBtn);
                         btnContainer.appendChild(insertBtn);
                         btnContainer.appendChild(editBtn);
                         btnContainer.appendChild(deleteBtn);
@@ -536,36 +558,41 @@
             renderList();
         }
 
-        // Modifier un titre ET son numéro/position
+        // Modifier uniquement le texte/numéro
         function editSong(index) {
             const currentItem = appData[currentList][index];
             
-            // 1. Demander le nouveau numéro (affichage)
             const newNum = prompt("Modifier le numéro d'affichage (ex: 12, 12bis) :", currentItem.num || "");
             if (newNum === null) return; 
 
-            // 2. Demander le nouveau titre
             const newTitle = prompt("Modifier le titre :", currentItem.title || "");
             if (newTitle === null) return; 
-
-            // 3. Demander si on veut déplacer la ligne visuellement dans la liste
-            const currentPos = index + 1;
-            const newPosStr = prompt(`À quelle ligne de tableau (de 1 à ${appData[currentList].length}) voulez-vous placer ceci ?\n(Laissez tel quel pour ne pas bouger la ligne)`, currentPos);
-            if (newPosStr === null) return; 
             
-            let newPos = parseInt(newPosStr, 10);
-            
-            // Mise à jour de l'objet
             appData[currentList][index] = { num: newNum.trim(), title: newTitle.trim() };
-
-            // Déplacement dans le tableau si demandé
-            if (!isNaN(newPos) && newPos >= 1 && newPos <= appData[currentList].length && newPos !== currentPos) {
-                const [movedItem] = appData[currentList].splice(index, 1);
-                appData[currentList].splice(newPos - 1, 0, movedItem);
-            }
-
             saveData();
             renderList();
+        }
+
+        // Déplacer vers le haut
+        function moveSongUp(index) {
+            if (index > 0) {
+                const temp = appData[currentList][index];
+                appData[currentList][index] = appData[currentList][index - 1];
+                appData[currentList][index - 1] = temp;
+                saveData();
+                renderList();
+            }
+        }
+
+        // Déplacer vers le bas
+        function moveSongDown(index) {
+            if (index < appData[currentList].length - 1) {
+                const temp = appData[currentList][index];
+                appData[currentList][index] = appData[currentList][index + 1];
+                appData[currentList][index + 1] = temp;
+                saveData();
+                renderList();
+            }
         }
 
         // Supprimer
