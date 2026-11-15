@@ -48,6 +48,26 @@
             color: var(--primary);
             font-weight: bold;
         }
+        .backup-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .btn-backup {
+            flex: 1;
+            padding: 8px;
+            border-radius: 6px;
+            border: none;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .btn-backup:active {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
         .search-container {
             padding: 10px 15px;
             background: white;
@@ -67,7 +87,7 @@
             margin: 0;
             overflow-y: auto;
             flex: 1;
-            padding-bottom: 80px; 
+            padding-bottom: 90px; 
         }
         li {
             background: white;
@@ -108,7 +128,7 @@
             display: flex;
             gap: 2px;
         }
-        button {
+        button.action-btn {
             border: none;
             background: none;
             font-size: 18px;
@@ -125,7 +145,7 @@
         .btn-insert { color: #27ae60; }
         .btn-edit { color: var(--secondary); }
         .btn-delete { color: #e74c3c; }
-        button:active { background: #eee; }
+        button.action-btn:active { background: #eee; }
         
         .add-btn {
             position: fixed;
@@ -142,6 +162,7 @@
             justify-content: center;
             align-items: center;
             border: none;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -149,6 +170,7 @@
 
     <header>
         <div id="app-title">Répertoire Musical</div>
+        
         <select id="list-selector">
             <option value="ALL">🔍 Rechercher dans TOUT le répertoire</option>
             <option value="A">Liste A (Photo 1)</option>
@@ -156,6 +178,13 @@
             <option value="C">Liste C (Photo 3)</option>
             <option value="D">Liste D (Photo 4)</option>
         </select>
+
+        <!-- NOUVEAU : Boutons de sauvegarde Cloud/Fichier -->
+        <div class="backup-container">
+            <button id="btn-export" class="btn-backup">💾 Sauvegarder</button>
+            <button id="btn-import" class="btn-backup">📂 Restaurer</button>
+            <input type="file" id="file-import" style="display: none;" accept=".json">
+        </div>
     </header>
 
     <div class="search-container">
@@ -169,7 +198,7 @@
     <button class="add-btn" id="add-btn">+</button>
 
     <script>
-        // --- DONNÉES INITIALES RETRANSCRITES DEPUIS LES PHOTOS ---
+        // --- DONNÉES INITIALES ---
         const defaultData = {
             "A": [
                 {num: "1", title: "le vieux piano la"},
@@ -395,13 +424,12 @@
             ]
         };
 
-        // --- LOGIQUE DE L'APPLICATION ---
         let currentList = 'ALL'; 
         let appData = {};
 
         function initData() {
-            // V6 pour forcer la mise à jour depuis le cache
-            const savedData = localStorage.getItem('repertoireMusiqueV6'); 
+            // Chargement de la version V6/V7
+            let savedData = localStorage.getItem('repertoireMusiqueV7') || localStorage.getItem('repertoireMusiqueV6'); 
             
             if (savedData) {
                 appData = JSON.parse(savedData);
@@ -412,7 +440,7 @@
         }
 
         function saveData() {
-            localStorage.setItem('repertoireMusiqueV6', JSON.stringify(appData));
+            localStorage.setItem('repertoireMusiqueV7', JSON.stringify(appData));
         }
 
         function renderList() {
@@ -475,42 +503,36 @@
                     btnContainer.className = 'actions';
                     
                     if (currentList !== 'ALL') {
-                        // Flèche Haut
                         const upBtn = document.createElement('button');
-                        upBtn.className = 'btn-move';
+                        upBtn.className = 'action-btn btn-move';
                         upBtn.innerHTML = '⬆️';
                         upBtn.title = "Monter";
                         upBtn.onclick = () => moveSongUp(item.originalIndex);
                         
-                        // Flèche Bas
                         const downBtn = document.createElement('button');
-                        downBtn.className = 'btn-move';
+                        downBtn.className = 'action-btn btn-move';
                         downBtn.innerHTML = '⬇️';
                         downBtn.title = "Descendre";
                         downBtn.onclick = () => moveSongDown(item.originalIndex);
 
-                        // Insérer
                         const insertBtn = document.createElement('button');
-                        insertBtn.className = 'btn-insert';
+                        insertBtn.className = 'action-btn btn-insert';
                         insertBtn.innerHTML = '➕';
                         insertBtn.title = "Insérer ici";
                         insertBtn.onclick = () => insertSong(item.originalIndex);
                         
-                        // Modifier
                         const editBtn = document.createElement('button');
-                        editBtn.className = 'btn-edit';
+                        editBtn.className = 'action-btn btn-edit';
                         editBtn.innerHTML = '✏️';
                         editBtn.title = "Modifier";
                         editBtn.onclick = () => editSong(item.originalIndex);
                         
-                        // Supprimer
                         const deleteBtn = document.createElement('button');
-                        deleteBtn.className = 'btn-delete';
+                        deleteBtn.className = 'action-btn btn-delete';
                         deleteBtn.innerHTML = '🗑️';
                         deleteBtn.title = "Supprimer";
                         deleteBtn.onclick = () => deleteSong(item.originalIndex);
 
-                        // Si c'est le premier élément, on désactive la flèche haut, etc.
                         if (item.originalIndex === 0) upBtn.style.opacity = '0.2';
                         if (item.originalIndex === appData[currentList].length - 1) downBtn.style.opacity = '0.2';
 
@@ -528,7 +550,57 @@
             });
         }
 
-        // Ajouter à la fin (bouton +)
+        // --- FONCTIONS CLOUD / SAUVEGARDE ---
+        
+        // Exporter les données vers un fichier JSON
+        function exportData() {
+            const dataStr = JSON.stringify(appData, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            const date = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+            a.download = `repertoire_musique_${date}.json`;
+            document.body.appendChild(a);
+            a.click();
+            
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert("Fichier généré ! Enregistrez-le sur votre appareil, iCloud, ou Google Drive pour ne rien perdre.");
+        }
+
+        // Importer les données depuis un fichier JSON
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    // Petite vérification de sécurité pour s'assurer que c'est le bon format de fichier
+                    if (importedData.A && importedData.B && importedData.C && importedData.D) {
+                        appData = importedData;
+                        saveData();
+                        renderList();
+                        alert("Vos listes ont été restaurées avec succès !");
+                    } else {
+                        alert("Erreur : Ce fichier ne semble pas être une sauvegarde valide du répertoire.");
+                    }
+                } catch (error) {
+                    alert("Erreur lors de la lecture du fichier. Assurez-vous d'avoir sélectionné le bon fichier.");
+                }
+            };
+            reader.readAsText(file);
+            
+            // On réinitialise l'input au cas où l'utilisateur voudrait re-sélectionner le même fichier plus tard
+            event.target.value = "";
+        }
+
+        // --- ACTIONS BASIQUES ---
         function addSong() {
             if (currentList === 'ALL') {
                 alert("Veuillez sélectionner une liste spécifique (A, B, C ou D) dans le menu pour ajouter.");
@@ -545,7 +617,6 @@
             renderList();
         }
 
-        // Insérer un titre à un endroit précis
         function insertSong(index) {
             const newNum = prompt("Entrez le numéro à insérer (ex: 12bis) ou laissez vide :");
             if (newNum === null) return;
@@ -558,10 +629,8 @@
             renderList();
         }
 
-        // Modifier uniquement le texte/numéro
         function editSong(index) {
             const currentItem = appData[currentList][index];
-            
             const newNum = prompt("Modifier le numéro d'affichage (ex: 12, 12bis) :", currentItem.num || "");
             if (newNum === null) return; 
 
@@ -573,7 +642,6 @@
             renderList();
         }
 
-        // Déplacer vers le haut
         function moveSongUp(index) {
             if (index > 0) {
                 const temp = appData[currentList][index];
@@ -584,7 +652,6 @@
             }
         }
 
-        // Déplacer vers le bas
         function moveSongDown(index) {
             if (index < appData[currentList].length - 1) {
                 const temp = appData[currentList][index];
@@ -595,7 +662,6 @@
             }
         }
 
-        // Supprimer
         function deleteSong(index) {
             if (confirm("Supprimer cette ligne ?")) {
                 appData[currentList].splice(index, 1);
@@ -613,6 +679,13 @@
 
         document.getElementById('search-input').addEventListener('input', renderList);
         document.getElementById('add-btn').addEventListener('click', addSong);
+        
+        // Événements pour la sauvegarde
+        document.getElementById('btn-export').addEventListener('click', exportData);
+        document.getElementById('btn-import').addEventListener('click', () => {
+            document.getElementById('file-import').click();
+        });
+        document.getElementById('file-import').addEventListener('change', importData);
 
         // Démarrage de l'app
         initData();
